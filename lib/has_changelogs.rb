@@ -1,4 +1,5 @@
-require "has_changelogs/version"
+require 'active_record'
+require 'has_changelogs/version'
 
 module HasChangelogs
   module ClassMethods
@@ -37,15 +38,15 @@ module HasChangelogs
     end
 
     def record_create
-      log_change(:log_action => :created)
+      log_changes(:log_action => :created)
     end
 
     def record_update
-      log_change(:log_action => :updated)
+      log_changes(:log_action => :updated)
     end
 
     def record_destroy
-      log_change(:log_action => :destroyed)
+      log_changes(:log_action => :destroyed)
     end
 
     def object_changed_notably?
@@ -62,7 +63,7 @@ module HasChangelogs
       changed - ignore
     end
 
-    def log_change(options = {})
+    def log_changes(options = {})
       # changelog(options).epic_changes.create(
       #   # :epic_hero              => epic_hero!(options),
       #   # :epic_action            => epic_action!(options),
