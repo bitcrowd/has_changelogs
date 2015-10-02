@@ -18,11 +18,6 @@ module HasChangelogs
        has_changelog_options[:ignore] = (Array(has_changelog_options[:ignore]) | [:updated_at] ).map &:to_s
        has_changelog_options[:only]   = Array(has_changelog_options[:only]).map &:to_s
 
-      # [:ignore, :only].each do |k|
-      #     has_changelog_options[k] =
-      #       ([has_changelog_options[k]].flatten.compact || []).map &:to_s
-      # end
-
       has_many :changelogs, :class_name => '::Changelog', :as => :changelogs
     end
 
