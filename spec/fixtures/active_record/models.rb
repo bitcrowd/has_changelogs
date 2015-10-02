@@ -1,8 +1,8 @@
 class User < ActiveRecord::Base
   has_changelogs
-  
+
   def my_condition
-    true
+    name == "True Condition"
   end
 end
 
@@ -14,10 +14,10 @@ class IgnoreName < User
   has_changelogs ignore: :name
 end
 
-class IfTrue < User
+class IfCondition < User
   has_changelogs if: :my_condition
 end
 
-class UnlessTrue < User
+class UnlessCondition < User
   has_changelogs unless: :my_condition
 end
