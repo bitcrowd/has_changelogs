@@ -6,6 +6,10 @@ class User < ActiveRecord::Base
   end
 end
 
+class LogEverythingUser < User
+  has_changelogs
+end
+
 class OnlyName < User
   has_changelogs only: :name
 end
@@ -21,3 +25,4 @@ end
 class UnlessCondition < User
   has_changelogs unless: :my_condition
 end
+

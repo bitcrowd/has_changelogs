@@ -8,4 +8,8 @@ ActiveRecord::Schema.define do
     t.string :uuid
     t.timestamps
   end
+
+  create_table :changelogs, force: true do |t|
+    t.timestamps
+  end
 end

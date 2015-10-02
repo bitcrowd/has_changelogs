@@ -11,4 +11,5 @@ ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: File.dirna
 
 load File.dirname(__FILE__) + '/fixtures/active_record/schema.rb'
 load File.dirname(__FILE__) + '/fixtures/active_record/models.rb'
+load File.dirname(__FILE__) + '/fixtures/active_record/changelog.rb'
 load File.dirname(__FILE__) + '/fixtures/shared/seeds.rb'
