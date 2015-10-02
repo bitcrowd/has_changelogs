@@ -15,8 +15,8 @@ module HasChangelogs
       self.has_changelog_options = options.dup
 
 
-       has_changelog_options[:ignore] = (([has_changelog_options[:ignore]].flatten.compact || []) | [:updated_at]).map &:to_s
-       has_changelog_options[:only]   = ([has_changelog_options[:only]].flatten.compact   || [])   .map &:to_s
+       has_changelog_options[:ignore] = (Array(has_changelog_options[:ignore]) | [:updated_at] ).map &:to_s
+       has_changelog_options[:only]   = Array(has_changelog_options[:only]).map &:to_s
 
       # [:ignore, :only].each do |k|
       #     has_changelog_options[k] =
