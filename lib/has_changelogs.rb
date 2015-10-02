@@ -7,17 +7,15 @@ module HasChangelogs
     def has_changelogs(options = {})
       send :include, InstanceMethods
 
-      after_create  :record_create,  :if => :change_relevant? if !options[:on] || options[:on].include?(:create)
-      before_update :record_update,  :if => :change_relevant? if !options[:on] || options[:on].include?(:update)
-      after_destroy :record_destroy, :if => :change_relevant? if !options[:on] || options[:on].include?(:destroy)
+      after_create  :record_created if !options[:on] || options[:on].include?(:create)
+      before_update :record_updated,           :if => :change_relevant? if !options[:on] || options[:on].include?(:update)
+      after_destroy :record_will_be_destroyed if !options[:on] || options[:on].include?(:destroy)
 
       class_attribute :has_changelog_options
       self.has_changelog_options = options.dup
 
-      [:ignore, :only].each do |k|
-          has_changelog_options[k] =
-            ([has_changelog_options[k]].flatten.compact || []).map &:to_s
-      end
+      has_changelog_options[:ignore] = (([has_changelog_options[:ignore]].flatten.compact || []) | [:updated_at]).map &:to_s
+      has_changelog_options[:only]   = ([has_changelog_options[:only]].flatten.compact   || [])   .map &:to_s
 
       has_many :changelogs, :class_name => '::Changelog', :as => :changelogs
     end
@@ -37,22 +35,6 @@ module HasChangelogs
       (if_condition.blank? || if_condition.call(self)) && (unless_condition.blank? || !unless_condition.call(self))
     end
 
-    def record_create
-      log_changes(:log_action => :created)
-    end
-
-    def record_update
-      log_changes(:log_action => :updated)
-    end
-
-    def record_destroy
-      log_changes(:log_action => :destroyed)
-    end
-
-    def object_changed_notably?
-      notable_changes.any?
-    end
-
     def notable_changes
       only = self.class.has_changelog_options[:only]
       only.empty? ? changed_and_not_ignored : (changed_and_not_ignored & only)
@@ -63,24 +45,56 @@ module HasChangelogs
       changed - ignore
     end
 
+    def object_changed_notably?
+      notable_changes.any?
+    end
+    # the actions
+
+    def record_created
+      puts "record_created"
+      log_changes(:log_action => :created,   log_scope: :instance)
+    end
+
+    def record_updated
+      puts "record_updated"
+      log_changes(:log_action => :updated,   log_scope: :attributes)
+    end
+
+    def record_will_be_destroyed
+      log_changes(:log_action => :destroyed, log_scope: :instance)
+    end
+
+
     def log_changes(options = {})
-      # changelog(options).epic_changes.create(
-      #   # :epic_hero              => epic_hero!(options),
-      #   # :epic_action            => epic_action!(options),
-      #   # :epic_action_by_admin   => epic_action_by_admin!(options),
+      log_scope = options[:log_scope]
+      wtfchanges = if (log_scope == :instance || log_scope == :attributes)
+        []
+      else
+        []
+        # get changes from options
+      end
 
-      #   # :epic_item              => epic_item!(options),
+      wtfchanges.each do |change|
+        log_change log_data(options, change)
+      end
 
-      #   # :epic_item_nickname     => epic_item_nickname!(options),
-      #   # :epic_item_owner        => epic_item_owner!(options),
+    end
 
-      #   # :epic_treasure          => epic_treasure!(options),
-      #   # :epic_treasureguard     => epic_treasureguard!(options),
-      #   # :epic_treasure_nickname  => epic_treasure_nickname!(options),
+    def log_change(options = {})
+      changelog_association.create(options)
+    end
 
-      #   # :epic_change_data        => epic_change_data!(options),
-      #   # :epic_change_attributes  => epic_change_attributes!(options)
-      # )
+    def logged_model
+      self.class.has_changelog_options[:changelog_model] || self
+    end
+
+    def changelog_association
+      changelog_association_name = self.class.has_changelog_options[:changelogs_association] || change_logs
+      logged_model.send changelog_association_name
+    end
+
+    def log_data(options, change)
+
     end
 
     # def epic_hero!(options = {})
