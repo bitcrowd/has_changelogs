@@ -8,3 +8,4 @@
 /spec/reports/
 /tmp/
 /spec/.DS_Store
+/spec/has_changelogs.sqlite3
