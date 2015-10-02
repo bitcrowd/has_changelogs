@@ -51,12 +51,10 @@ module HasChangelogs
     # the actions
 
     def record_created
-      puts "record_created"
       log_changes(:log_action => :created,   log_scope: :instance)
     end
 
     def record_updated
-      puts "record_updated"
       log_changes(:log_action => :updated,   log_scope: :attributes)
     end
 
