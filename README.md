@@ -1,8 +1,8 @@
 # HasChangelogs
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/has_changelogs`. To experiment with that code, run `bin/console` for an interactive prompt.
+has_changelogs tracks changes on a model and it's associations for applications that need to have change history. The version is however, 0.1.0, so use at your own perril.
 
-TODO: Delete this and the text above, and describe your gem
+Especially a generator for the changelog model is missing - see /spec/fixtures/active_record/changelog.rb for it.
 
 ## Installation
 
@@ -22,7 +22,47 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Given you had a fitting Changelog Model (see ./spec/fixtures/active_record/changelog.rb) you can do the following:
+
+```ruby
+class User < ActiveRecord::Base
+  has_changelogs
+
+  def my_condition
+    name == "True Condition"
+  end
+end
+
+class LogEverythingUser < User
+  has_changelogs ignore: [:type, :id]
+end
+
+class OnlyName < User
+  has_changelogs only: :name
+end
+
+class IgnoreName < User
+  has_changelogs ignore: :name
+end
+
+class IfCondition < User
+  has_changelogs if: :my_condition
+end
+
+class UnlessCondition < User
+  has_changelogs unless: :my_condition
+end
+
+class WithPassportsUser < LogEverythingUser
+  has_many :passports, foreign_key: :user_id
+end
+
+class Passport < ActiveRecord::Base
+  belongs_to :user, class_name: "WithPassportsUser"
+  has_changelogs at: :user
+end
+
+```
 
 ## Development
 
@@ -32,7 +72,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/has_changelogs.
+Bug reports and pull requests are welcome on GitHub at https://github.com/bitcrowd/has_changelogs.
 
 
 ## License
