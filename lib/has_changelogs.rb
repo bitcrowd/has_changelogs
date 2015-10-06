@@ -7,17 +7,25 @@ module HasChangelogs
     def has_changelogs(options = {})
       send :include, InstanceMethods
 
-      after_create  :record_created if !options[:on] || options[:on].include?(:create)
-      before_update :record_updated,           :if => :change_relevant? if !options[:on] || options[:on].include?(:update)
-      after_destroy :record_will_be_destroyed if !options[:on] || options[:on].include?(:destroy)
+      after_create   :record_created                           if !options[:on] || options[:on].include?(:create)
+      before_destroy :record_will_be_destroyed                 if !options[:on] || options[:on].include?(:destroy)
 
+      after_update   :record_updated, :if => :change_relevant? if !options[:on] || options[:on].include?(:update)
+
+      prepare_class_options(options)
+
+      has_many :changelogs, as: :logable
+    end
+
+    private
+
+    def prepare_class_options(options)
       class_attribute :has_changelog_options
       self.has_changelog_options = options.dup
 
-      has_changelog_options[:ignore] = (Array(has_changelog_options[:ignore]) | [:updated_at] ).map &:to_s
-      has_changelog_options[:only]   = Array(has_changelog_options[:only]).map &:to_s
-
-      has_many :changelogs, :class_name => '::Changelog', :as => :changelogs
+      has_changelog_options[:ignore]  = (Array(has_changelog_options[:ignore]) | [:updated_at, :created_at, :id] ).map &:to_s
+      has_changelog_options[:only]    =  Array(has_changelog_options[:only]).map &:to_s
+      has_changelog_options[:force]   =  Array(has_changelog_options[:force]).map &:to_s
     end
 
   end
@@ -32,12 +40,19 @@ module HasChangelogs
     end
 
     def conditions_met?(if_condition, unless_condition)
-      (if_condition.blank? || if_condition.call(self)) && (unless_condition.blank? || !unless_condition.call(self))
+      (if_condition.blank? || if_condition.call(self)) &&
+        (unless_condition.blank? || !unless_condition.call(self))
     end
 
     def notable_changes
-      only = self.class.has_changelog_options[:only]
-      only.empty? ? changed_and_not_ignored : (changed_and_not_ignored & only)
+      notable_attributes
+    end
+
+    def notable_attributes
+      only    = self.class.has_changelog_options[:only]
+      force   = self.class.has_changelog_options[:force]
+      notable = only.empty? ? changed_and_not_ignored : (changed_and_not_ignored & only)
+      notable + force
     end
 
     def changed_and_not_ignored
@@ -51,48 +66,50 @@ module HasChangelogs
     # the actions
 
     def record_created
-      log_changes(:log_action => :created,   log_scope: :instance)
+      log_change(log_scope: log_scope, log_action: 'created', changed_data: log_data, log_origin: log_origin)
     end
 
     def record_updated
-      log_changes(:log_action => :updated,   log_scope: :attributes)
+      log_change(log_scope: log_scope, log_action: 'updated', changed_data: log_data, log_origin: log_origin)
     end
 
     def record_will_be_destroyed
-      log_changes(:log_action => :destroyed, log_scope: :instance)
-    end
-
-
-    def log_changes(options = {})
-      log_scope = options[:log_scope]
-      wtfchanges = if (log_scope == :instance || log_scope == :attributes)
-        []
-      else
-        []
-        # get changes from options
-      end
-
-      wtfchanges.each do |change|
-        log_change log_data(options, change)
-      end
-
+      log_change(log_scope: log_scope, log_action: 'destroyed', changed_data: self.attributes, log_origin: log_origin)
     end
 
     def log_change(options = {})
       changelog_association.create(options)
     end
 
+    def log_scope
+      has_changelog_options[:at].present? ? :association : :instance
+    end
+
     def logged_model
-      self.class.has_changelog_options[:changelog_model] || self
+      has_changelog_options[:at].present? ?
+        send(has_changelog_options[:at]) : self
+    end
+
+    def log_origin
+      self.class.to_s
     end
 
     def changelog_association
-      changelog_association_name = self.class.has_changelog_options[:changelogs_association] || change_logs
       logged_model.send changelog_association_name
     end
 
-    def log_data(options, change)
+    def changelog_association_name
+      self.class.has_changelog_options[:changelogs_association] || :changelogs
+    end
 
+    def log_data(options = {})
+      raw_changed_data(options).select do |key, value|
+        notable_changes.include? key.to_s
+      end
+    end
+
+    def raw_changed_data(options = {})
+      options[:change_data] || self.changes || {}
     end
 
     # def epic_hero!(options = {})

@@ -7,7 +7,7 @@ class User < ActiveRecord::Base
 end
 
 class LogEverythingUser < User
-  has_changelogs
+  has_changelogs ignore: [:type, :id]
 end
 
 class OnlyName < User
@@ -26,3 +26,11 @@ class UnlessCondition < User
   has_changelogs unless: :my_condition
 end
 
+class WithPassportsUser < LogEverythingUser
+  has_many :passports, foreign_key: :user_id
+end
+
+class Passport < ActiveRecord::Base
+  belongs_to :user, class_name: "WithPassportsUser"
+  has_changelogs at: :user
+end
