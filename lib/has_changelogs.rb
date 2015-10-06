@@ -66,19 +66,24 @@ module HasChangelogs
     # the actions
 
     def record_created
-      log_change(log_scope: log_scope, log_action: 'created', changed_data: log_data, log_origin: log_origin)
+      log_change(log_action: 'created')
     end
 
     def record_updated
-      log_change(log_scope: log_scope, log_action: 'updated', changed_data: log_data, log_origin: log_origin)
+      log_change(log_action: 'updated')
     end
 
     def record_will_be_destroyed
-      log_change(log_scope: log_scope, log_action: 'destroyed', changed_data: self.attributes, log_origin: log_origin)
+      log_change(log_action: 'destroyed', changed_data: attributes)
     end
 
     def log_change(options = {})
-      changelog_association.create(options)
+      defaults = {
+        log_scope:    log_scope,
+        changed_data: log_data,
+        log_origin:   log_origin }
+
+      changelog_association.create(defaults.merge options)
     end
 
     def log_scope
@@ -86,8 +91,11 @@ module HasChangelogs
     end
 
     def logged_model
-      has_changelog_options[:at].present? ?
-        send(has_changelog_options[:at]) : self
+      if has_changelog_options[:at].present?
+        send(has_changelog_options[:at])
+      else
+        self
+      end
     end
 
     def log_origin
@@ -109,7 +117,7 @@ module HasChangelogs
     end
 
     def raw_changed_data(options = {})
-      options[:change_data] || self.changes || {}
+      options[:change_data] || changes || {}
     end
 
   end
