@@ -112,55 +112,6 @@ module HasChangelogs
       options[:change_data] || self.changes || {}
     end
 
-    # def epic_hero!(options = {})
-    #   options[:epic_hero]
-    # end
-
-    # def epic_action!(options = {})
-    #   options[:epic_action] || "updated"
-    # end
-
-    # def epic_action_by_admin!(options = {})
-    #   !!options[:epic_action_by_admin]
-    # end
-
-    # def log_item(options = {})
-    #   options[:log_item] || self
-    # end
-
-    # def epic_item_nickname!(options = {})
-    #   options[:log_item_nickname]
-    # end
-
-    # def epic_item_owner!(options = {})
-    #   options[:log_item_owner]
-    # end
-
-
-    # def epic_treasure!(options = {})
-    #   options[:epic_treasure]
-    # end
-    # def epic_treasure_nickname!(options = {})
-    #   options[:epic_treasure_nickname]
-    # end
-    # def epic_treasureguard!(options = {})
-    #   options[:epic_treasureguard]
-    # end
-
-    # def epic_change_data!(options = {})
-    #   raw_change_data.to_json
-    # end
-
-    # def epic_change_attributes!(options = {})
-    #   options[:epic_change_attributes] || raw_change_data(options).keys.join(",")
-    # end
-
-    # private
-
-    # def raw_change_data(options = {})
-    #   options[:epic_change_data] || self.changes || {}
-    # end
-
   end
 
   def self.included(receiver)
