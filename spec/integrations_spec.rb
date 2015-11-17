@@ -43,7 +43,7 @@ describe HasChangelogs do
   end
 
   describe 'updating a record' do
-    it 'should create a changelog of log action updated on every uptdate' do
+    it 'should create a changelog of log action updated on every update' do
       subject = LogEverythingUser.create(
         name: 'Lisa Simpson',
         email: 'lisa@simpson.com',
@@ -59,7 +59,24 @@ describe HasChangelogs do
       expect(subject.changelogs.last.log_scope).to eq('instance')
     end
 
-    it 'should not create a changelog if nothing is changed by the uptdate' do
+    it 'should create a changelog of log action when updating to nil' do
+      subject = LogEverythingUser.create(
+        name: 'Lisa Simpson',
+        email: 'lisa@simpson.com',
+        uuid: '123ABC')
+
+      subject.name = nil
+
+      expect { subject.save }.to change { Changelog.count }.by(1)
+      expect(subject.changelogs.last.changed_data).to eq(
+        'name' => ['Lisa Simpson', nil]
+      )
+
+      expect(subject.changelogs.last.log_action).to eq('updated')
+      expect(subject.changelogs.last.log_scope).to eq('instance')
+    end
+
+    it 'should not create a changelog if nothing is changed by the update' do
       subject = LogEverythingUser.create(
         name: 'Lisa Simpson',
         email: 'lisa@simpson.com',
