@@ -81,7 +81,8 @@ module HasChangelogs
       defaults = {
         log_scope:    log_scope,
         changed_data: log_data,
-        log_origin:   log_origin }
+        log_origin:   log_origin,
+        log_metadata: log_metadata }
 
       changelog_association.create(defaults.merge options)
     end
@@ -100,6 +101,10 @@ module HasChangelogs
 
     def log_origin
       self.class.to_s
+    end
+
+    def log_metadata
+      {}
     end
 
     def changelog_association
