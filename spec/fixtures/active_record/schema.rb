@@ -15,6 +15,7 @@ ActiveRecord::Schema.define do
     t.string	   :log_scope
     t.string	   :log_action
     t.string     :log_origin
+    t.text       :log_metadata
     t.text		   :changed_data
   end
 

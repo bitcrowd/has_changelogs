@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe HasChangelogs do
+
   describe 'creating a new record' do
     it 'should add a new changelog when a record is created' do
       subject = LogEverythingUser.new(
@@ -127,7 +128,7 @@ describe HasChangelogs do
           .to eq(
             'nationality' => [nil, 'de'],
             'valid_until' => [nil, '2040-12-13'],
-            'user_id'     => [nil, 21]
+            'user_id'     => [nil, subject.id]
           )
       end
     end
@@ -186,6 +187,28 @@ describe HasChangelogs do
             'nationality' => 'de',
             'user_id'     => subject.id,
             'valid_until' => '2040-12-13')
+      end
+    end
+  end
+
+  describe 'log metadata' do
+    context 'model has metadata method defined' do
+      it 'should log metadata' do
+        subject = WithMetadataUser.create(
+          name: 'Lisa Simpson',
+          email: 'lisa@simpson.com',
+          uuid: '123ABC')
+        expect(subject.log_metadata).to eq({"hello"=>"world"})
+      end
+    end
+
+    context 'model has default metadata method' do
+      it 'should log metadata' do
+        subject = LogEverythingUser.create(
+          name: 'Lisa Simpson',
+          email: 'lisa@simpson.com',
+          uuid: '123ABC')
+        expect(subject.log_metadata).to eq({})
       end
     end
   end

@@ -30,6 +30,12 @@ class WithPassportsUser < LogEverythingUser
   has_many :passports, foreign_key: :user_id
 end
 
+class WithMetadataUser < LogEverythingUser
+  def log_metadata
+    {"hello" => "world"}
+  end
+end
+
 class Passport < ActiveRecord::Base
   belongs_to :user, class_name: "WithPassportsUser"
   has_changelogs at: :user
