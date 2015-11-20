@@ -1,6 +1,6 @@
 # HasChangelogs
 
-has_changelogs tracks changes on a model and it's associations for applications that need to have change history. The version is however, 0.1.0, so use at your own perril.
+has_changelogs tracks changes on a model and it's associations for applications that need to have change history. The version is however, 0.2.0, so use at your own perril.
 
 Especially a generator for the changelog model is missing - see /spec/fixtures/active_record/changelog.rb for it.
 
